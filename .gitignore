@@ -1,0 +1,7 @@
+.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/uploads/messages/*
+!backend/uploads/messages/.gitkeep
+backend/uploads/avatars/*
+!backend/uploads/avatars/.gitkeep

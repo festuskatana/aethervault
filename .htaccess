@@ -1,0 +1,58 @@
+RewriteEngine On
+DirectoryIndex index.php index.html
+Options -Indexes
+
+# Preserve bearer auth headers on shared hosting
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Normalize accidental trailing slashes on direct PHP page requests
+RewriteRule ^(index|dashboard|messages|chat|profile|admin|logout)\.php/$ $1.php [R=302,L,NC]
+
+# Let Apache serve real files and folders directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# API Routes
+RewriteRule ^api/login/?$ backend/api/login.php [L,QSA,NC]
+RewriteRule ^api/register/?$ backend/api/register.php [L,QSA,NC]
+RewriteRule ^api/logout/?$ backend/api/logout.php [L,QSA,NC]
+RewriteRule ^api/unread/?$ backend/api/unread_count.php [L,QSA,NC]
+RewriteRule ^api/profile/?$ backend/api/get_profile.php [L,QSA,NC]
+RewriteRule ^api/profile/update/?$ backend/api/update_profile.php [L,QSA,NC]
+RewriteRule ^api/messages/edit/?$ backend/api/edit_message.php [L,QSA,NC]
+RewriteRule ^api/messages/delete/?$ backend/api/delete_message.php [L,QSA,NC]
+RewriteRule ^api/messages/upload/?$ backend/api/upload_chat_media.php [L,QSA,NC]
+RewriteRule ^api/upload/?$ backend/api/upload_media.php [L,QSA,NC]
+RewriteRule ^api/messages/?$ backend/api/fetch_messages.php [L,QSA,NC]
+RewriteRule ^api/send/?$ backend/api/send_message.php [L,QSA,NC]
+RewriteRule ^api/search/?$ backend/api/search_users.php [L,QSA,NC]
+
+# Frontend Routes
+RewriteRule ^dashboard/?$ dashboard.php [L,QSA,NC]
+RewriteRule ^messages/?$ messages.php [L,QSA,NC]
+RewriteRule ^chat/?$ messages.php [L,QSA,NC]
+RewriteRule ^profile/?$ profile.php [L,QSA,NC]
+RewriteRule ^messages\.html$ messages.php [L]
+RewriteRule ^dashboard\.html$ dashboard.php [L]
+RewriteRule ^chat\.html$ chat.php [L]
+RewriteRule ^index\.html$ index.php [L]
+RewriteRule ^$ index.php [L]
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Block hidden files
+RewriteRule "(^|/)\." - [F]
+
+# Enable CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
