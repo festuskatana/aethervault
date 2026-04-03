@@ -273,7 +273,7 @@ API.sendFileMessage = async (userId, file, caption, replyToId) => {
     const response = await fetch(`${API_BASE_URL}/messages/${userId}`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${getToken()}`
+            'Authorization': `Bearer ${getAuthToken()}`
         },
         body: formData
     });
@@ -287,7 +287,7 @@ API.sendMessage = async (userId, message, replyToId) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
+            'Authorization': `Bearer ${getAuthToken()}`
         },
         body: JSON.stringify({ message, reply_to: replyToId })
     });
@@ -301,7 +301,7 @@ API.editMessage = async (messageId, newMessage) => {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
+            'Authorization': `Bearer ${getAuthToken()}`
         },
         body: JSON.stringify({ message: newMessage })
     });
@@ -314,7 +314,7 @@ API.deleteMessage = async (messageId) => {
     const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
         method: 'DELETE',
         headers: {
-            'Authorization': `Bearer ${getToken()}`
+            'Authorization': `Bearer ${getAuthToken()}`
         }
     });
     
