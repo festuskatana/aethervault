@@ -251,6 +251,11 @@ function getAuthToken() {
     return localStorage.getItem('auth_token');
 }
 
+// Backward-compatible alias for older scripts that still reference getToken().
+function getToken() {
+    return getAuthToken();
+}
+
 // Set Auth Token
 function setAuthToken(token) {
     localStorage.setItem('auth_token', token);

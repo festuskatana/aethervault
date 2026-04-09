@@ -262,62 +262,40 @@ class API {
     }
 }
 
-// Add these to your existing API object
-
-API.sendFileMessage = async (userId, file, caption, replyToId) => {
+API.sendFileMessage = async (userId, file, caption = '', replyToId = null) => {
     const formData = new FormData();
+    formData.append('receiver_id', userId);
     formData.append('file', file);
-    if (caption) formData.append('message', caption);
-    if (replyToId) formData.append('reply_to', replyToId);
-    
-    const response = await fetch(`${API_BASE_URL}/messages/${userId}`, {
+
+    if (caption) {
+        formData.append('message', caption);
+    }
+
+    // Preserved for forward compatibility if backend support is added later.
+    if (replyToId) {
+        formData.append('reply_to', replyToId);
+    }
+
+    const response = await fetch(`${API_BASE_URL}upload_chat_media.php`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${getAuthToken()}`
         },
         body: formData
     });
-    
-    if (!response.ok) throw new Error('Failed to send file');
-    return response.json();
-};
 
-API.sendMessage = async (userId, message, replyToId) => {
-    const response = await fetch(`${API_BASE_URL}/messages/${userId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`
-        },
-        body: JSON.stringify({ message, reply_to: replyToId })
-    });
-    
-    if (!response.ok) throw new Error('Failed to send message');
-    return response.json();
-};
+    const rawResponse = await response.text();
+    let data = {};
 
-API.editMessage = async (messageId, newMessage) => {
-    const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`
-        },
-        body: JSON.stringify({ message: newMessage })
-    });
-    
-    if (!response.ok) throw new Error('Failed to edit message');
-    return response.json();
-};
+    try {
+        data = rawResponse ? JSON.parse(rawResponse) : {};
+    } catch (parseError) {
+        throw new Error('The attachment upload endpoint returned an invalid response.');
+    }
 
-API.deleteMessage = async (messageId) => {
-    const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${getAuthToken()}`
-        }
-    });
-    
-    if (!response.ok) throw new Error('Failed to delete message');
-    return response.json();
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to send file');
+    }
+
+    return data;
 };
